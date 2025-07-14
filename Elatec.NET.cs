@@ -787,6 +787,7 @@ namespace Elatec.NET
         private static readonly byte CRYPTO_ENV = 0;
         private static readonly byte DESFIRE_KEYLENGTH = 0x10;
         private static readonly byte DESFIRE_MAX_FILEIDS = 0xFF;
+        private static readonly byte MIFARE_DESFIRE_CHANGEFILESETTINGS = 0x5F;
 
         private static readonly byte MIFARE_DESFIRE_GETAPPIDS = 0;
         private static readonly byte MIFARE_DESFIRE_CREATEAPP = 1;
@@ -1329,6 +1330,34 @@ namespace Elatec.NET
             }
         }
 
+        /// <summary>
+        /// Changes file settings
+        /// </summary>
+        /// <param name="cryptoEnv"></param>
+        /// <param name="fileNo"></param>
+        /// <param name="newCommSet"></param>
+        /// <param name="oldAccessRights"></param>
+        /// <param name="newAccessRights"></param>
+        /// <exception cref="ReaderException"></exception>
+        public async Task MifareDesfire_ChangeFileSettingsAsync(byte cryptoEnv, byte fileNo, byte newCommSet, byte oldAccessRights, byte newAccessRights) {
+            List<byte> bytes = new List<byte> { 
+                API_MIFAREDESFIRE,
+                MIFARE_DESFIRE_CHANGEFILESETTINGS,
+                cryptoEnv,
+                fileNo,
+                newCommSet,
+                oldAccessRights,
+                newAccessRights
+            };
+            
+            var parser = await CallFunctionAsync(bytes.ToArray());
+            var success = parser.ParseBool();
+            
+            if (!success)
+            {
+                throw new ReaderException("Call was not successfull, error " + Enum.GetName(typeof(ReaderError), ReaderError.AccessDenied), null);
+            }
+        }
         //TODO: SYSFUNC(API_DESFIRE,26, bool DESFire_ChangeFileSettings(int CryptoEnv, int FileNo, int NewCommSet, int OldAccessRights, int NewAccessRights))
         //TODO: SYSFUNC(API_DESFIRE,27, bool DESFire_DisableFormatTag(int CryptoEnv))
         //TODO: SYSFUNC(API_DESFIRE,28, bool DESFire_EnableRandomID(int CryptoEnv))
